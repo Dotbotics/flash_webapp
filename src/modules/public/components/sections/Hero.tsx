@@ -24,7 +24,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { C, FlickIcon, SectionLabel } from "./shared";
-import { ClientLogosSection } from "./ClientLogos";
 
 const QUERIES = [
   "the sunset photo from our Goa trip with friends",
@@ -364,11 +363,6 @@ export function HeroSection({ data, onNavigate, darkMode = false, fullPageGradie
           <div className="hero-visual" style={{ animation: "slideUp 0.8s 0.15s ease both" }}>
             <HeroMockup text={mockupText} showResults={showResults} tilt={tilt} darkMode={darkMode} />
           </div>
-        </div>
-
-        {/* Client Logos — directly below the stats row */}
-        <div style={{ marginTop: 64, position: "relative", zIndex: 1 }}>
-          <ClientLogosSection data={data} darkMode={darkMode} />
         </div>
       </div>
     </section>

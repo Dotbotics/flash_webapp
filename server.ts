@@ -864,25 +864,6 @@ async function startServer() {
     res.json({ url });
   });
 
-  // Get Started Form Submissions (from Pricing page)
-  app.post("/api/get-started", async (req, res) => {
-    const { name, company, email, phone, designation, reason, plan } = req.body;
-    if (!name || !email) {
-      return res.status(400).json({ error: "Name and email are required" });
-    }
-    try {
-      const message = JSON.stringify({ company, phone, designation, reason, plan });
-      await db.run(
-        "INSERT INTO submissions (name, email, subject, message) VALUES (?, ?, ?, ?)",
-        [name, email, `Get Started — ${plan || "Pricing Page"}`, message]
-      );
-      res.json({ success: true });
-    } catch (err) {
-      console.error("Get Started submission error:", err);
-      res.status(500).json({ error: "Failed to save submission" });
-    }
-  });
-
   // Contact Form Submissions
   app.post("/api/contact", async (req, res) => {
     const { name, email, subject, message } = req.body;
