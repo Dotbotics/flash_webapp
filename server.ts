@@ -69,7 +69,7 @@ const seed = async () => {
         meta_keywords: "photo management, AI search, flash index, image retrieval",
         content: JSON.stringify({
           heroLabel: "AI-Powered File Retrieval · 2026",
-          heroTagline: "Find every file from the fragments you remember.",
+          heroTagline: "Describe anything you want to find",
           heroHeadline1: "Find anything.",
           heroHeadline2Base: "Just describe what you ",
           heroHeadline2Words: ["remember", "think of", "need"],

@@ -312,7 +312,7 @@ export const HomePage = ({ content, featuresContent, onNavigate, seo, darkMode =
   // Use content if provided, otherwise provide sensible defaults
   const data = content || {
     heroLabel: "AI-Powered File Retrieval · 2026",
-    heroTagline: "Find every file from the fragments you remember.",
+    heroTagline: "Describe anything you want to find",
     heroHeadline1: "Find anything.",
     heroHeadline2Gradient: "Just describe what you remember.",
     heroDescription: "FlashIndex connects to your cloud storage and finds photos, documents, videos, and files — with no folders, filenames, or filters required.",

@@ -31,7 +31,7 @@ import { ContentEditorFields } from '../components/ContentEditorFields';
 import { SEOEditorFields } from '../components/SEOEditorFields';
 import * as api from '../../../lib/api';
 
-const DEFAULT_HERO_TAGLINE = "Find every file from the fragments you remember.";
+const DEFAULT_HERO_TAGLINE = "Describe anything you want to find";
 
 const getEditableContent = (page: PageContent) => {
   if (page.id === 'home' && page.content && !('heroTagline' in page.content)) {

@@ -63,7 +63,7 @@ export const Navbar = ({ pages, isAdmin, siteConfig, navigation, heroTagline }: 
     return false;
   };
 
-  const displayTagline = heroTagline || "Find every file from the fragments you remember.";
+  const displayTagline = heroTagline || "Describe anything you want to find";
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
