@@ -1,0 +1,17 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+*.zip
+*.tar.gz
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.iml
+*.swp
+*.tmp
