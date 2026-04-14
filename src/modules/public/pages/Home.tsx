@@ -35,7 +35,6 @@ import { UseCasesSection } from "../components/sections/UseCases";
 import { TrustSection } from "../components/sections/Trust";
 import { CTASection } from "../components/sections/CTA";
 import { TestimonialsSection } from "../components/sections/Testimonials";
-import { ClientLogosSection } from "../components/sections/ClientLogos";
 
 /* ─────────────────────────────────────────────────────────
    INJECT STYLES FOR HOMEPAGE SECTIONS
@@ -411,7 +410,6 @@ export const HomePage = ({ content, featuresContent, onNavigate, seo, darkMode =
   return (
     <div style={darkMode ? { background: fullPageGradient ? C.homeFullGradient : C.homeDarkGradient } : undefined}>
       <HeroSection data={data} onNavigate={onNavigate} darkMode={darkMode} fullPageGradient={fullPageGradient} />
-      <ClientLogosSection data={data} darkMode={darkMode} />
       <ProblemSection data={data} featureSections={featuresContent?.featureSections || []} darkMode={darkMode} onNavigate={onNavigate} />
       <FeaturesSection data={data} darkMode={darkMode} />
       <HowItWorksSection data={data} darkMode={darkMode} />
