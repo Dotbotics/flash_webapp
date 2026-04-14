@@ -10,7 +10,7 @@
  * How it works:
  * - Dynamically renders 'plans' from the 'content' prop.
  * - Highlights the "Most Popular" plan (the second one in the list).
- * - Handles both internal navigation and external links.
+ * - "Get Started" opens an inline sign-up modal instead of navigating away.
  * 
  * Connections:
  * - Receives data and navigation handlers from 'src/app/App.tsx'.
@@ -24,17 +24,168 @@ import { ChevronRight, Zap, Check, X, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { C, SectionLabel, useReveal } from '../components/sections/shared';
 
-/**
- * PricingPage Component
- * 
- * Displays different subscription tiers and their features.
- * Redesigned to align with the high-end, animated aesthetic of the home page.
- */
+/* ─── Get Started Modal ──────────────────────────────────────────────── */
+
+interface GetStartedModalProps {
+  planName: string;
+  onClose: () => void;
+}
+
+function GetStartedModal({ planName, onClose }: GetStartedModalProps) {
+  const [form, setForm] = useState({
+    name: '',
+    company: '',
+    email: '',
+    phone: '',
+    designation: '',
+    reason: '',
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+
+  const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setForm(prev => ({ ...prev, [field]: e.target.value }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError('');
+    try {
+      const res = await fetch('/api/get-started', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, plan: planName }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Submission failed');
+      setSubmitted(true);
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const inputClass =
+    'w-full px-4 py-3 rounded-xl border border-black/10 bg-white text-graphite-night text-sm font-medium placeholder:text-graphite-night/30 focus:outline-none focus:ring-2 focus:ring-ruby-heat/30 focus:border-ruby-heat transition-all';
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-graphite-night/60 backdrop-blur-sm"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 24 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 24 }}
+        transition={{ type: 'spring', damping: 28, stiffness: 340 }}
+        className="relative w-full max-w-lg bg-white rounded-[32px] shadow-2xl overflow-hidden"
+      >
+        {/* Header */}
+        <div className="bg-ruby-heat px-8 pt-8 pb-6 relative">
+          <button
+            onClick={onClose}
+            className="absolute top-5 right-5 w-9 h-9 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white transition-all"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          <div className="text-white/70 text-xs font-bold uppercase tracking-widest mb-1">{planName} Plan</div>
+          <h2 className="text-2xl font-black text-white tracking-tight">Get Started with Flash Index</h2>
+          <p className="text-white/70 text-sm mt-1">Fill in your details and we'll be in touch shortly.</p>
+        </div>
+
+        {/* Body */}
+        <div className="px-8 py-7">
+          {submitted ? (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-8"
+            >
+              <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Check className="w-8 h-8 text-green-500" />
+              </div>
+              <h3 className="text-xl font-black text-graphite-night mb-2">You're on the list!</h3>
+              <p className="text-graphite-night/50 text-sm">Thanks, {form.name.split(' ')[0]}. Our team will reach out to you at <span className="font-semibold text-graphite-night">{form.email}</span> soon.</p>
+              <button
+                onClick={onClose}
+                className="mt-6 px-8 py-3 bg-ruby-heat text-white rounded-xl font-bold text-sm hover:shadow-lg hover:shadow-ruby-heat/30 transition-all"
+              >
+                Done
+              </button>
+            </motion.div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-graphite-night/50 uppercase tracking-widest mb-1.5">Full Name *</label>
+                  <input required className={inputClass} placeholder="Jane Smith" value={form.name} onChange={set('name')} />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-graphite-night/50 uppercase tracking-widest mb-1.5">Company Name *</label>
+                  <input required className={inputClass} placeholder="Acme Corp" value={form.company} onChange={set('company')} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-graphite-night/50 uppercase tracking-widest mb-1.5">Email Address *</label>
+                  <input required type="email" className={inputClass} placeholder="jane@acme.com" value={form.email} onChange={set('email')} />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-graphite-night/50 uppercase tracking-widest mb-1.5">Phone Number</label>
+                  <input type="tel" className={inputClass} placeholder="+1 555 000 0000" value={form.phone} onChange={set('phone')} />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-graphite-night/50 uppercase tracking-widest mb-1.5">Your Designation</label>
+                <input className={inputClass} placeholder="e.g. Head of Operations" value={form.designation} onChange={set('designation')} />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-graphite-night/50 uppercase tracking-widest mb-1.5">How will Flash Index help you?</label>
+                <textarea
+                  rows={3}
+                  className={`${inputClass} resize-none`}
+                  placeholder="Tell us about your use case, challenges, or goals..."
+                  value={form.reason}
+                  onChange={set('reason')}
+                />
+              </div>
+
+              {error && (
+                <p className="text-red-500 text-sm font-medium">{error}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full py-4 bg-ruby-heat text-white rounded-xl font-black text-sm uppercase tracking-widest hover:shadow-lg hover:shadow-ruby-heat/30 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {submitting ? 'Submitting…' : 'Submit & Get Started →'}
+              </button>
+            </form>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ─── Pricing Page ───────────────────────────────────────────────────── */
+
 export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate: (page: string) => void }) => {
   const revealRef = useReveal();
   const [selectedPlanIndex, setSelectedPlanIndex] = useState<number | null>(null);
   const [showComparison, setShowComparison] = useState(false);
   const [isMobileComparison, setIsMobileComparison] = useState(false);
+  const [getStartedPlan, setGetStartedPlan] = useState<string | null>(null);
 
   useEffect(() => {
     const syncComparisonLayout = () => {
@@ -57,15 +208,13 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
     }
   };
 
-  // Ensure each plan has features in the correct format (array of objects)
   const plans = (content.plans || []).map((plan: any) => ({
     ...plan,
-    features: Array.isArray(plan.features) 
+    features: Array.isArray(plan.features)
       ? plan.features.map((f: any) => typeof f === 'string' ? { name: f, enabled: true } : f)
       : []
   }));
 
-  // Get all unique feature names across all plans for the comparison table
   const allFeatureNames = Array.from(new Set(
     plans.flatMap((p: any) => p.features.map((f: any) => f.name))
   ));
@@ -79,24 +228,18 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
       {/* Pricing Header */}
       <section className="py-16 relative overflow-hidden bg-brand-gradient">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <motion.div 
-            animate={{ 
-              rotate: [0, 360],
-            }}
+          <motion.div
+            animate={{ rotate: [0, 360] }}
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             className="absolute -top-1/2 -left-1/2 w-full h-full bg-white/5 rounded-full blur-[120px]"
           />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
             <SectionLabel>{content.heroLabel || 'Pricing Plans'}</SectionLabel>
           </motion.div>
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -104,7 +247,7 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
           >
             {content.mainTitle || "Simple, Transparent Pricing"}
           </motion.h1>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -114,24 +257,22 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
           </motion.p>
         </div>
       </section>
-      
+
       <section ref={revealRef} className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Pricing Grid */}
           <div className="grid md:grid-cols-3 gap-8 items-stretch">
             {plans.map((plan: any, i: number) => {
               const isFeatured = plan.featured || (i === 1 && plan.featured === undefined);
               const tag = plan.tag || (i === 1 ? "Most Popular" : "");
-              // Only show enabled features on the card
               const displayFeatures = plan.features.filter((f: any) => f.enabled).slice(0, 5);
               const hasMoreFeatures = plan.features.length > 5;
 
               return (
-                <div 
-                  key={i} 
+                <div
+                  key={i}
                   className={`flex flex-col p-10 rounded-[32px] border relative overflow-hidden reveal reveal-d${i + 1} transition-all duration-500 hover:-translate-y-2 ${
-                    isFeatured 
-                      ? 'border-ruby-heat bg-white text-graphite-night shadow-2xl z-10' 
+                    isFeatured
+                      ? 'border-ruby-heat bg-white text-graphite-night shadow-2xl z-10'
                       : 'border-black/5 bg-flash-light/50 text-graphite-night shadow-sm'
                   }`}
                 >
@@ -142,48 +283,45 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
                   )}
 
                   <div className="mb-8">
-                    <h3 className={`text-xl font-bold mb-3 text-graphite-night`}>{plan.name}</h3>
+                    <h3 className="text-xl font-bold mb-3 text-graphite-night">{plan.name}</h3>
                     <div className="flex items-baseline gap-1">
                       <span className="text-4xl font-black tracking-tight">{plan.price}</span>
                       {plan.price !== 'Free' && plan.price !== 'Custom' && <span className="text-base opacity-40">/mo</span>}
                     </div>
                   </div>
-                  
-                  {/* Feature list */}
+
                   <ul className="space-y-4 mb-6 flex-grow">
                     {displayFeatures.map((f: any, j: number) => (
                       <li key={j} className="flex items-center space-x-3 group">
                         <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${isFeatured ? 'bg-ruby-heat text-white' : 'bg-ruby-heat/10 text-ruby-heat border border-ruby-heat/20'}`}>
                           <Check className="w-3 h-3" />
                         </div>
-                        <span className={`font-medium text-sm text-graphite-night/70`}>{f.name}</span>
+                        <span className="font-medium text-sm text-graphite-night/70">{f.name}</span>
                       </li>
                     ))}
                   </ul>
 
                   {hasMoreFeatures && (
-                    <button 
-                      onClick={() => {
-                        setSelectedPlanIndex(i);
-                        setShowComparison(true);
-                      }}
+                    <button
+                      onClick={() => { setSelectedPlanIndex(i); setShowComparison(true); }}
                       className="text-ruby-heat text-xs font-bold uppercase tracking-widest mb-10 hover:underline flex items-center gap-2"
                     >
                       <Info className="w-4 h-4" />
                       View all features
                     </button>
                   )}
-                  
-                  <Link 
-                    to={plan.ctaLink || '/contact'}
-                    className={`w-full py-4 rounded-xl font-bold text-base transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg text-center inline-block ${
-                      isFeatured 
-                        ? 'bg-ruby-heat text-white hover:shadow-[0_0_30px_rgba(251,91,21,0.4)]' 
+
+                  {/* Get Started button — opens modal */}
+                  <button
+                    onClick={() => setGetStartedPlan(plan.name)}
+                    className={`w-full py-4 rounded-xl font-bold text-base transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg text-center ${
+                      isFeatured
+                        ? 'bg-ruby-heat text-white hover:shadow-[0_0_30px_rgba(251,91,21,0.4)]'
                         : 'bg-graphite-night text-white hover:bg-black'
                     }`}
                   >
                     {plan.ctaText || "Get Started"}
-                  </Link>
+                  </button>
                 </div>
               );
             })}
@@ -195,14 +333,14 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
       <AnimatePresence>
         {showComparison && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowComparison(false)}
               className="absolute inset-0 bg-graphite-night/60 backdrop-blur-sm"
             />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -213,7 +351,7 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
                   <h2 className="text-xl sm:text-2xl font-black text-graphite-night tracking-tight">{content.comparisonTitle || 'Compare Plans'}</h2>
                   <p className="text-sm text-graphite-night/40 font-medium">{content.comparisonDescription || 'Detailed feature breakdown for all Flash Index tiers.'}</p>
                 </div>
-                <button 
+                <button
                   onClick={() => setShowComparison(false)}
                   className="w-10 h-10 sm:w-12 sm:h-12 bg-white border border-black/5 rounded-2xl flex items-center justify-center text-graphite-night hover:bg-ruby-heat hover:text-white transition-all shadow-sm flex-shrink-0"
                 >
@@ -225,10 +363,7 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
                 {isMobileComparison ? (
                   <div className="space-y-4">
                     {mobileComparisonPlans.map((p: any, idx: number) => (
-                      <div
-                        key={idx}
-                        className={`rounded-[24px] border p-5 ${idx === 0 ? 'border-ruby-heat bg-ruby-heat/5' : 'border-black/5 bg-white'}`}
-                      >
+                      <div key={idx} className={`rounded-[24px] border p-5 ${idx === 0 ? 'border-ruby-heat bg-ruby-heat/5' : 'border-black/5 bg-white'}`}>
                         <div className="mb-4">
                           <div className="text-lg font-black text-graphite-night">{p.name}</div>
                           <div className="text-sm text-ruby-heat font-bold mt-1">{p.price}</div>
@@ -299,6 +434,16 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
         )}
       </AnimatePresence>
 
+      {/* Get Started Modal */}
+      <AnimatePresence>
+        {getStartedPlan !== null && (
+          <GetStartedModal
+            planName={getStartedPlan}
+            onClose={() => setGetStartedPlan(null)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* FAQ / Trust Section */}
       <section className="py-24 border-t border-black/5 bg-flash-light/30">
         <div className="max-w-4xl mx-auto px-4 text-center">
@@ -309,7 +454,7 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
           <p className="text-lg text-graphite-night/50 mb-8 font-medium">
             {content.ctaDescription || "We offer tailored solutions for large-scale enterprises with specific security and compliance requirements."}
           </p>
-          <Link 
+          <Link
             to={content.ctaButtonLink || '/contact'}
             className="fi-btn-secondary inline-flex items-center"
           >
