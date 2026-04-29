@@ -127,6 +127,7 @@ const seed = async () => {
           demo: [
             {
               label: "Personal Memory",
+              videoId: "Q3Fv3N5gxbU",
               query: "sunset photo from Goa trip with friends",
               time: "0.19s",
               results: [
@@ -537,6 +538,7 @@ const migrate = async () => {
         demo: [
           {
             label: "Personal Memory",
+            videoId: "Q3Fv3N5gxbU",
             query: "sunset photo from Goa trip with friends",
             time: "0.19s",
             results: [
@@ -640,23 +642,23 @@ const migrate = async () => {
         subtitle: "Choose the plan that's right for your memory scale.",
         plans: [
           { 
-            name: "Individual", 
-            price: "Free", 
+            name: "Enterprise", 
+            price: "Custom", 
             features: [
               { name: "Basic search", enabled: true },
               { name: "1 Cloud account", enabled: true },
-              { name: "Advanced AI", enabled: false },
-              { name: "Unlimited Clouds", enabled: false },
-              { name: "Priority support", enabled: false },
-              { name: "SSO", enabled: false },
-              { name: "Dedicated support", enabled: false },
-              { name: "Custom integrations", enabled: false },
-              { name: "Audit logs", enabled: false },
-              { name: "SLA Guarantee", enabled: false }
+              { name: "Advanced AI", enabled: true },
+              { name: "Unlimited Clouds", enabled: true },
+              { name: "Priority support", enabled: true },
+              { name: "SSO", enabled: true },
+              { name: "Dedicated support", enabled: true },
+              { name: "Custom integrations", enabled: true },
+              { name: "Audit logs", enabled: true },
+              { name: "SLA Guarantee", enabled: true }
             ], 
-            tag: "", 
-            featured: false,
-            ctaText: "Get Started",
+            tag: "Best Value", 
+            featured: true,
+            ctaText: "Contact Sales",
             ctaLink: "/contact"
           },
           { 
@@ -675,28 +677,28 @@ const migrate = async () => {
               { name: "SLA Guarantee", enabled: false }
             ], 
             tag: "Most Popular", 
-            featured: true,
+            featured: false,
             ctaText: "Get Started",
             ctaLink: "/contact"
           },
           { 
-            name: "Enterprise", 
-            price: "Custom", 
+            name: "Individual", 
+            price: "Free", 
             features: [
               { name: "Basic search", enabled: true },
               { name: "1 Cloud account", enabled: true },
-              { name: "Advanced AI", enabled: true },
-              { name: "Unlimited Clouds", enabled: true },
-              { name: "Priority support", enabled: true },
-              { name: "SSO", enabled: true },
-              { name: "Dedicated support", enabled: true },
-              { name: "Custom integrations", enabled: true },
-              { name: "Audit logs", enabled: true },
-              { name: "SLA Guarantee", enabled: true }
+              { name: "Advanced AI", enabled: false },
+              { name: "Unlimited Clouds", enabled: false },
+              { name: "Priority support", enabled: false },
+              { name: "SSO", enabled: false },
+              { name: "Dedicated support", enabled: false },
+              { name: "Custom integrations", enabled: false },
+              { name: "Audit logs", enabled: false },
+              { name: "SLA Guarantee", enabled: false }
             ], 
-            tag: "Best Value", 
+            tag: "", 
             featured: false,
-            ctaText: "Contact Sales",
+            ctaText: "Get Started",
             ctaLink: "/contact"
           }
         ],
@@ -778,10 +780,18 @@ const migrate = async () => {
         continue;
       }
 
+      if (upd.id === 'home' && Array.isArray(content.demo) && Array.isArray(upd.defaults.demo)) {
+        content.demo = content.demo.map((demo: any, index: number) => ({
+          ...(upd.defaults.demo[index] || {}),
+          ...demo
+        }));
+        changed = true;
+      }
+
       if (upd.id === 'pricing' && Array.isArray(content.plans) && Array.isArray(upd.defaults.plans)) {
         const templatePlans = upd.defaults.plans;
         content.plans = content.plans.map((plan: any, index: number) => {
-          const template = templatePlans[index] || {};
+          const template: any = templatePlans[index] || {};
           return {
             ...template,
             ...plan,

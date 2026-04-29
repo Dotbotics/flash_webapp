@@ -152,7 +152,7 @@ export function ProblemSection({ data, featureSections = [], darkMode = false, o
   }, [slides]);
 
   const currentSlide = slides[activeIndex] || slides[0];
-  const bg = darkMode ? "transparent" : "#fafafa";
+  const bg = darkMode ? "transparent" : "#fff";
   const cardBg = darkMode ? "#141414" : "#fff";
   const cardBorder = darkMode ? "rgba(255,255,255,0.05)" : "#eee";
   const barBg = darkMode ? "#1c1c1c" : "#f5f5f5";

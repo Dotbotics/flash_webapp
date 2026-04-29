@@ -20,7 +20,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronRight, Zap, Check, X, Info } from 'lucide-react';
+import { Zap, Check, X, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { C, SectionLabel, useReveal } from '../components/sections/shared';
 
@@ -32,7 +32,6 @@ import { C, SectionLabel, useReveal } from '../components/sections/shared';
  */
 export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate: (page: string) => void }) => {
   const revealRef = useReveal();
-  const [selectedPlanIndex, setSelectedPlanIndex] = useState<number | null>(null);
   const [showComparison, setShowComparison] = useState(false);
   const [isMobileComparison, setIsMobileComparison] = useState(false);
 
@@ -48,15 +47,6 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
 
   if (!content) return null;
 
-  const handleLink = (link: string) => {
-    if (!link) return;
-    if (link.startsWith('/')) {
-      onNavigate(link.substring(1) || 'home');
-    } else {
-      window.open(link, '_blank');
-    }
-  };
-
   // Ensure each plan has features in the correct format (array of objects)
   const plans = (content.plans || []).map((plan: any) => ({
     ...plan,
@@ -70,9 +60,19 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
     plans.flatMap((p: any) => p.features.map((f: any) => f.name))
   ));
 
-  const mobileComparisonPlans = selectedPlanIndex === null
-    ? plans
-    : [plans[selectedPlanIndex], ...plans.filter((_: any, idx: number) => idx !== selectedPlanIndex)];
+  const comparisonPlans = [...plans].sort((a: any, b: any) => {
+    const rank = (plan: any) => {
+      const name = String(plan?.name || "").toLowerCase();
+      if (name.includes("enterprise")) return 0;
+      if (name.includes("pro")) return 1;
+      if (name.includes("starter") || name.includes("individual") || String(plan?.price || "").toLowerCase() === "free") return 2;
+      return 3;
+    };
+
+    return rank(a) - rank(b);
+  });
+
+  const mobileComparisonPlans = comparisonPlans;
 
   return (
     <div className="noise-overlay min-h-screen bg-white pt-20">
@@ -164,7 +164,6 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
                   {hasMoreFeatures && (
                     <button 
                       onClick={() => {
-                        setSelectedPlanIndex(i);
                         setShowComparison(true);
                       }}
                       className="text-ruby-heat text-xs font-bold uppercase tracking-widest mb-10 hover:underline flex items-center gap-2"
@@ -257,8 +256,8 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
                         <thead>
                           <tr>
                             <th className="text-left py-6 px-4 text-xs font-bold text-graphite-night/30 uppercase tracking-widest border-b border-black/5">Feature</th>
-                            {plans.map((p: any, idx: number) => (
-                              <th key={idx} className={`text-center py-6 px-4 border-b border-black/5 ${idx === selectedPlanIndex ? 'bg-ruby-heat/5' : ''}`}>
+                            {comparisonPlans.map((p: any, idx: number) => (
+                              <th key={idx} className="text-center py-6 px-4 border-b border-black/5">
                                 <div className="text-sm font-black text-graphite-night">{p.name}</div>
                                 <div className="text-xs text-ruby-heat font-bold mt-1">{p.price}</div>
                               </th>
@@ -269,11 +268,11 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
                           {allFeatureNames.map((featureName: any, fIdx: number) => (
                             <tr key={fIdx} className="group hover:bg-flash-light/30 transition-colors">
                               <td className="py-5 px-4 text-sm font-bold text-graphite-night/70 border-b border-black/5">{featureName}</td>
-                              {plans.map((p: any, pIdx: number) => {
+                              {comparisonPlans.map((p: any, pIdx: number) => {
                                 const feature = p.features.find((f: any) => f.name === featureName);
                                 const isEnabled = feature ? feature.enabled : false;
                                 return (
-                                  <td key={pIdx} className={`py-5 px-4 text-center border-b border-black/5 ${pIdx === selectedPlanIndex ? 'bg-ruby-heat/5' : ''}`}>
+                                  <td key={pIdx} className="py-5 px-4 text-center border-b border-black/5">
                                     {isEnabled ? (
                                       <div className="w-6 h-6 bg-green-500/10 text-green-600 rounded-full flex items-center justify-center mx-auto">
                                         <Check className="w-4 h-4" />

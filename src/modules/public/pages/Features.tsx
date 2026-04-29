@@ -7,8 +7,8 @@ import { motion } from 'motion/react';
 import { Zap, Search, Cloud, Maximize, Image as ImageIcon, Layout, Database, Globe } from 'lucide-react';
 import { C, SectionLabel, useReveal } from '../components/sections/shared';
 
-const FeatureSection = (props: { title: string, description: string, label: string, icon: any, reversed?: boolean, children: React.ReactNode, key?: any }) => {
-  const { title, description, label, icon: Icon, reversed = false, children } = props;
+const FeatureSection = (props: { title: string, description: string, label: string, icon: any, points?: string[], reversed?: boolean, children: React.ReactNode, key?: any }) => {
+  const { title, description, label, icon: Icon, points = [], reversed = false, children } = props;
   const revealRef = useReveal();
 
   return (
@@ -36,7 +36,7 @@ const FeatureSection = (props: { title: string, description: string, label: stri
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-graphite-night mb-6 leading-tight tracking-tight">{title}</h2>
             <p className="text-lg text-graphite-night/60 mb-10 leading-relaxed font-medium">{description}</p>
             <div className="space-y-4">
-              {['Instant sub-second response times', 'End-to-end encrypted metadata', 'Zero-config setup in minutes'].map((point, i) => (
+              {(points.length > 0 ? points : ['Instant sub-second response times', 'End-to-end encrypted metadata', 'Zero-config setup in minutes']).map((point, i) => (
                 <div key={i} className="flex items-center gap-4">
                   <div className="w-6 h-6 rounded-full bg-ruby-heat/10 border border-ruby-heat/20 flex items-center justify-center text-ruby-heat">
                     <Check className="w-3 h-3" />
@@ -134,7 +134,7 @@ export const FeaturesPage = ({ content, onNavigate }: { content: any, onNavigate
         const icons = [Search, Cloud, ImageIcon, Layout, Maximize];
         const Icon = icons[idx % icons.length];
         return (
-          <FeatureSection key={idx} label={section.label} icon={Icon} title={section.title} description={section.description} reversed={section.reversed}>
+          <FeatureSection key={idx} label={section.label} icon={Icon} title={section.title} description={section.description} points={section.points || []} reversed={section.reversed}>
             {idx === 0 ? (
               <div className="space-y-6">
                 <div className="flex items-center gap-3 bg-ruby-heat/5 border border-ruby-heat/20 rounded-xl px-4 py-4 mb-6">
@@ -171,16 +171,6 @@ export const FeaturesPage = ({ content, onNavigate }: { content: any, onNavigate
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <div key={i} className="aspect-square rounded-xl overflow-hidden border border-black/5 relative group">
                     <img src={`https://picsum.photos/seed/img${i + idx}/200/200`} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" referrerPolicy="no-referrer" alt="Feature" />
-                  </div>
-                ))}
-              </div>
-            )}
-            {section.points && (
-              <div className="mt-6 space-y-2">
-                {section.points.map((p: string, i: number) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <Check className="w-3 h-3 text-ruby-heat" />
-                    <span className="text-[10px] font-bold text-graphite-night/40 uppercase tracking-widest">{p}</span>
                   </div>
                 ))}
               </div>

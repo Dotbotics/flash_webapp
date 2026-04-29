@@ -22,6 +22,16 @@
 
 import { C, SectionLabel, useReveal } from "./shared";
 
+function FeatureIcon({ icon }: { icon: string }) {
+  const isImage = typeof icon === "string" && (icon.startsWith("http") || icon.startsWith("/uploads"));
+
+  if (isImage) {
+    return <img src={icon} alt="" style={{ width: 28, height: 28, objectFit: "contain" }} />;
+  }
+
+  return <>{icon}</>;
+}
+
 export function FeaturesSection({ data, darkMode = false }: { data: any; darkMode?: boolean }) {
   const ref = useReveal();
   const cards = data?.features || [
@@ -33,7 +43,7 @@ export function FeaturesSection({ data, darkMode = false }: { data: any; darkMod
     { icon: "📈", title: "Enterprise Scale", desc: "Works for 10 files or 10 million. FlashIndex scales with your organization without any added complexity." },
   ];
 
-  const bg = darkMode ? "transparent" : "#fff";
+  const bg = darkMode ? "transparent" : "#fafafa";
   const text = darkMode ? "#f0ede8" : C.dark;
   const muted = darkMode ? "#eeeae9" : "#888";
   const iconBg = darkMode ? "rgba(251,91,21,0.1)" : "#fff3ee";
@@ -57,7 +67,7 @@ export function FeaturesSection({ data, darkMode = false }: { data: any; darkMod
             <div key={i} className={`fi-card reveal reveal-d${(i % 3) + 1}`} style={{ padding: "36px 28px", position: "relative", overflow: "hidden" }}>
 
               <div style={{ width: 52, height: 52, borderRadius: 14, background: iconBg, border: `1.5px solid ${iconBorder}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, marginBottom: 22 }}>
-                {c.icon}
+                <FeatureIcon icon={c.icon} />
               </div>
               <h3 style={{ fontSize: 18, fontWeight: 800, color: text, marginBottom: 10, letterSpacing: "-0.3px" }}>{c.title}</h3>
               <p style={{ fontSize: 14, color: muted, lineHeight: 1.75 }}>{c.desc}</p>

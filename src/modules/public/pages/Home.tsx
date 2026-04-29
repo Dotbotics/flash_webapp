@@ -412,8 +412,8 @@ export const HomePage = ({ content, featuresContent, onNavigate, seo, darkMode =
     <div style={darkMode ? { background: fullPageGradient ? C.homeFullGradient : C.homeDarkGradient } : undefined}>
       <HeroSection data={data} onNavigate={onNavigate} darkMode={darkMode} fullPageGradient={fullPageGradient} />
       <ClientLogosSection data={data} darkMode={darkMode} />
-      <ProblemSection data={data} featureSections={featuresContent?.featureSections || []} darkMode={darkMode} onNavigate={onNavigate} />
       <FeaturesSection data={data} darkMode={darkMode} />
+      <ProblemSection data={data} featureSections={featuresContent?.featureSections || []} darkMode={darkMode} onNavigate={onNavigate} />
       <HowItWorksSection data={data} darkMode={darkMode} />
       <DemoSection data={data} darkMode={darkMode} />
       <TestimonialsSection data={data} darkMode={darkMode} />

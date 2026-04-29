@@ -23,6 +23,16 @@
 import { useState } from "react";
 import { C, SectionLabel, useReveal } from "./shared";
 
+function StepIcon({ icon, size = 28 }: { icon: string; size?: number }) {
+  const isImage = typeof icon === "string" && (icon.startsWith("http") || icon.startsWith("/uploads"));
+
+  if (isImage) {
+    return <img src={icon} alt="" style={{ width: size, height: size, objectFit: "contain" }} />;
+  }
+
+  return <>{icon}</>;
+}
+
 export function HowItWorksSection({ data, darkMode = false }: { data: any; darkMode?: boolean }) {
   const ref = useReveal();
   const [active, setActive] = useState(0);
@@ -81,7 +91,7 @@ export function HowItWorksSection({ data, darkMode = false }: { data: any; darkM
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 24, flexShrink: 0,
                     transition: "all 0.25s",
-                  }}>{s.icon}</div>
+                  }}><StepIcon icon={s.icon} /></div>
                   <div>
                     <div style={{ fontFamily: "'Roboto Mono', monospace", fontSize: 10, letterSpacing: "3px", color: active === i ? C.orange : softMuted, textTransform: "uppercase", marginBottom: 4 }}>{s.num}</div>
                     <h3 style={{ fontSize: 17, fontWeight: 800, color: text }}>{s.title}</h3>
@@ -101,7 +111,7 @@ export function HowItWorksSection({ data, darkMode = false }: { data: any; darkM
                 <div style={{ fontSize: 64, fontWeight: 900, color: darkMode ? "rgba(251,91,21,0.2)" : "rgba(251,91,21,0.12)", lineHeight: 1, marginBottom: -8, fontFamily: "'Roboto Mono', monospace" }}>
                   {steps[active].num}
                 </div>
-                <div style={{ fontSize: 40 }}>{steps[active].icon}</div>
+                <div style={{ fontSize: 40, width: 56, height: 56, display: "flex", alignItems: "center" }}><StepIcon icon={steps[active].icon} size={44} /></div>
                 <h3 style={{ fontSize: 24, fontWeight: 900, color: text, margin: "12px 0 14px", letterSpacing: "-0.5px" }}>
                   {steps[active].title}
                 </h3>

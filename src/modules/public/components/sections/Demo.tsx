@@ -27,6 +27,7 @@ import { C, FlickIcon, SectionLabel, useReveal } from "./shared";
 const DEMOS = [
   {
     label: "Personal Memory",
+    videoId: "Q3Fv3N5gxbU",
     query: "sunset photo from Goa trip with friends",
     time: "0.19s",
     results: [
@@ -67,12 +68,22 @@ const DEMOS = [
   },
 ];
 
+function getYouTubeVideoId(value?: string) {
+  if (!value) return "";
+
+  const trimmed = value.trim();
+  const match = trimmed.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+  return match?.[1] || trimmed;
+}
+
 export function DemoSection({ data, darkMode = false }: { data: any; darkMode?: boolean }) {
   const ref = useReveal();
   const [active, setActive] = useState(0);
 
-  // Use demo data from props if provided, otherwise use DEMOS
-  const demoData = data?.demo || DEMOS;
+  // Merge CMS-edited labels/query/results with defaults so existing saved rows still keep default video metadata.
+  const demoData = Array.isArray(data?.demo)
+    ? data.demo.map((item: any, index: number) => ({ ...(DEMOS[index] || {}), ...item }))
+    : DEMOS;
   const demo = demoData[active] || DEMOS[active];
 
   const bg = darkMode ? "transparent" : "#fff";
@@ -84,7 +95,9 @@ export function DemoSection({ data, darkMode = false }: { data: any; darkMode?: 
   const sidebarBg = darkMode ? "#181818" : "#fafafa";
   const sidebarBorder = darkMode ? "rgba(255,255,255,0.05)" : "#f0f0f0";
   const muted = darkMode ? "#eeeae9" : "#aaa";
-  const isPersonalMemoryTab = demo?.label?.trim().toLowerCase() === "personal memory";
+  // Check if the current tab has a videoId defined (for any tab, not just "Personal Memory")
+  const videoId = getYouTubeVideoId(demo?.videoId || demo?.videoUrl);
+  const hasVideo = videoId !== "";
 
   return (
     <section id="demo" ref={ref as any} style={{ padding: "96px 0", background: bg }}>
@@ -104,12 +117,12 @@ export function DemoSection({ data, darkMode = false }: { data: any; darkMode?: 
           ))}
         </div>
 
-        {isPersonalMemoryTab ? (
+        {hasVideo ? (
           <div className="reveal" style={{ background: cardBg, border: `1.5px solid ${cardBorder}`, borderRadius: 20, overflow: "hidden", boxShadow: darkMode ? "0 20px 60px rgba(0,0,0,0.3)" : "0 20px 60px rgba(0,0,0,0.08)" }}>
             <div style={{ position: "relative", width: "100%", paddingTop: "56.25%", background: darkMode ? "#111" : "#000" }}>
               <iframe
-                src="https://www.youtube.com/embed/Q3Fv3N5gxbU"
-                title="Personal Memory demo"
+                src={`https://www.youtube.com/embed/${videoId}`}
+                title={demo.label}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 referrerPolicy="strict-origin-when-cross-origin"
                 allowFullScreen

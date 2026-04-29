@@ -74,7 +74,7 @@ export const ContentEditorFields = ({
     'Use Cases': ['useCasesLabel', 'useCasesHeadline', 'useCasesHeadlineHighlight', 'useCases'],
     'Trust & Integrations': ['trustLabel', 'trustHeadline', 'trustHeadlineHighlight', 'trustBadges', 'integrations'],
     'CTA Section': ['ctaBadge', 'ctaHeadline', 'ctaHeadlineHighlight', 'ctaDescription', 'ctaPrimaryButton', 'ctaPrimaryButtonLink', 'ctaSecondaryButton', 'ctaSecondaryButtonLink'],
-    'Pricing Section': ['heroLabel', 'mainTitle', 'subtitle', 'plans', 'comparisonTitle', 'comparisonDescription', 'ctaTitle', 'ctaDescription', 'ctaButtonText', 'ctaButtonLink'],
+    'Pricing Section': ['heroLabel', 'mainTitle', 'subtitle', 'plans', 'comparisonTitle', 'comparisonDescription', 'ctaTitle', 'ctaDescription', 'ctaButtonText', 'ctaButtonLink', 'heroTitle', 'heroDescription'],
     'Features Page Content': ['heroLabel', 'mainTitle', 'description', 'oldWayLabel', 'oldWayHeadline', 'oldWayDescription', 'oldWayPoints', 'featureSections', 'ctaTitle', 'ctaTitleHighlight', 'ctaDescription', 'ctaPrimaryButtonText', 'ctaPrimaryButtonLink', 'ctaSecondaryButtonText', 'ctaSecondaryButtonLink'],
     'About Page Content': ['heroLabel', 'heroTitle', 'heroTitleAccent', 'aboutText', 'missionTitle', 'mission', 'visionTitle', 'vision', 'valuesLabel', 'valuesTitle', 'coreValues', 'ctaTitle', 'ctaDescription', 'ctaPrimaryButtonText', 'ctaPrimaryButtonLink', 'ctaSecondaryButtonText', 'ctaSecondaryButtonLink'],
     'Contact Page Content': ['heroLabel', 'heroTitle', 'heroTitleAccent', 'heroDescription', 'contactInfoTitle', 'addressLabel', 'address', 'emailLabel', 'email', 'phoneLabel', 'phone', 'enterpriseTitle', 'enterpriseDescription', 'firstNameLabel', 'firstNamePlaceholder', 'lastNameLabel', 'lastNamePlaceholder', 'emailFieldLabel', 'emailPlaceholder', 'subjectLabel', 'subjectOptions', 'messageLabel', 'messagePlaceholder', 'submitButtonText', 'submittingButtonText', 'successTitle', 'successMessage', 'resetButtonText', 'errorMessage'],
@@ -97,10 +97,13 @@ export const ContentEditorFields = ({
     });
   }
 
+  const isUploadField = (field: string) => /image|logo|avatar|photo|icon/i.test(field);
+  const isUploadedMediaUrl = (value: unknown) => typeof value === 'string' && (value.startsWith('http') || value.startsWith('/uploads'));
+
   const renderField = (key: string) => {
     const value = editContent[key];
     const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-    const isMediaField = /image|logo|avatar|photo|icon/i.test(key);
+    const isMediaField = isUploadField(key);
 
     return (
       <div key={key} className="space-y-4">
@@ -123,18 +126,20 @@ export const ContentEditorFields = ({
           <div className="space-y-4">
             {isMediaField && (
               <div className="flex items-center space-x-6">
-                <div className="w-48 h-32 rounded-2xl overflow-hidden bg-white border border-black/10 shadow-sm">
-                  <img 
-                    src={value} 
-                    className="w-full h-full object-cover" 
-                    referrerPolicy="no-referrer" 
-                    alt="Preview"
-                  />
-                </div>
+                {isUploadedMediaUrl(value) && (
+                  <div className="w-48 h-32 rounded-2xl overflow-hidden bg-white border border-black/10 shadow-sm">
+                    <img 
+                      src={value} 
+                      className="w-full h-full object-cover" 
+                      referrerPolicy="no-referrer" 
+                      alt="Preview"
+                    />
+                  </div>
+                )}
                 <label className="cursor-pointer">
                   <div className="flex items-center space-x-2 px-6 py-3 bg-white border border-black/10 rounded-xl text-sm font-bold hover:bg-black/5 transition-colors shadow-sm">
                     <Upload className="w-4 h-4 text-[#fb5b15]" />
-                    <span>Upload New Image</span>
+                    <span>{isUploadedMediaUrl(value) ? 'Upload New Image' : 'Upload Image'}</span>
                   </div>
                   <input 
                     type="file" 
@@ -227,9 +232,24 @@ export const ContentEditorFields = ({
                             </button>
                           )}
                         </div>
-                        {/image|logo|avatar|photo|icon/i.test(field) ? (
-                          <div className="flex items-center space-x-4">
-                            <img src={item[field]} className="w-16 h-16 rounded-lg object-cover border border-black/5" referrerPolicy="no-referrer" alt="Preview" />
+                        {typeof item[field] === 'boolean' ? (
+                          <div className="flex items-center space-x-3">
+                            <button 
+                              onClick={() => {
+                                updateArrayField(key, idx, field, !item[field]);
+                              }}
+                              className={`w-10 h-5 rounded-full transition-colors relative ${item[field] ? 'bg-emerald-500' : 'bg-black/10'}`}
+                            >
+                              <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${item[field] ? 'left-5.5' : 'left-0.5'}`} />
+                            </button>
+                            <span className="text-[10px] font-bold text-[#262626]/40">{item[field] ? 'Included' : 'Not Included'}</span>
+                          </div>
+                        ) : isUploadField(field) && typeof item[field] === 'string' ? (
+                          <div className="space-y-3">
+                            <div className="flex items-center space-x-4">
+                              {isUploadedMediaUrl(item[field]) && (
+                                <img src={item[field]} className="w-16 h-16 rounded-lg object-contain border border-black/5 bg-[#eeeae9]/40" referrerPolicy="no-referrer" alt="Preview" />
+                              )}
                             <label className="cursor-pointer">
                               <div className="px-4 py-2 bg-[#eeeae9] rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-black/5 transition-colors">Upload</div>
                               <input 
@@ -242,18 +262,14 @@ export const ContentEditorFields = ({
                                 }}
                               />
                             </label>
-                          </div>
-                        ) : typeof item[field] === 'boolean' ? (
-                          <div className="flex items-center space-x-3">
-                            <button 
-                              onClick={() => {
-                                updateArrayField(key, idx, field, !item[field]);
-                              }}
-                              className={`w-10 h-5 rounded-full transition-colors relative ${item[field] ? 'bg-emerald-500' : 'bg-black/10'}`}
-                            >
-                              <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${item[field] ? 'left-5.5' : 'left-0.5'}`} />
-                            </button>
-                            <span className="text-[10px] font-bold text-[#262626]/40">{item[field] ? 'Included' : 'Not Included'}</span>
+                            </div>
+                            <input 
+                              type="text" 
+                              value={item[field]}
+                              onChange={(e) => updateArrayField(key, idx, field, e.target.value)}
+                              className="w-full px-4 py-2 rounded-xl bg-[#eeeae9]/50 border-none text-sm focus:ring-2 focus:ring-[#fb5b15] outline-none font-medium"
+                              placeholder="Emoji, icon text, or uploaded image URL"
+                            />
                           </div>
                         ) : Array.isArray(item[field]) ? (
                           <div className="space-y-2">

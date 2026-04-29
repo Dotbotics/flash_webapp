@@ -32,16 +32,54 @@ import { SEOEditorFields } from '../components/SEOEditorFields';
 import * as api from '../../../lib/api';
 
 const DEFAULT_HERO_TAGLINE = "Describe anything you want to find";
+const DEFAULT_DEMO_VIDEO_ID = "Q3Fv3N5gxbU";
+
+const PAGE_CONTENT_DEFAULTS: Record<string, any> = {
+  pricing: {
+    heroLabel: "Pricing Plans",
+    mainTitle: "Simple, Transparent Pricing",
+    subtitle: "Choose the plan that's right for your memory scale.",
+  },
+  features: {
+    heroLabel: "Features & Capabilities",
+    mainTitle: "Everything you need to find anything.",
+    description: "Unlocking the power of your memory with advanced AI indexing and retrieval.",
+  },
+  about: {
+    heroLabel: "Our Story",
+    heroTitle: "About",
+    heroTitleAccent: "Flash Index",
+  },
+  contact: {
+    heroLabel: "Contact Us",
+    heroTitle: "Get in",
+    heroTitleAccent: "Touch",
+    heroDescription: "Have questions? We are here to help you find your way. Our team is ready to assist with any inquiries.",
+  },
+};
 
 const getEditableContent = (page: PageContent) => {
-  if (page.id === 'home' && page.content && !('heroTagline' in page.content)) {
-    return {
-      ...page.content,
-      heroTagline: DEFAULT_HERO_TAGLINE,
+  if (!page.content) return page.content;
+
+  let content = {
+    ...(PAGE_CONTENT_DEFAULTS[page.id] || {}),
+    ...page.content,
+  };
+
+  if (page.id === 'home') {
+    content = {
+      ...content,
+      heroTagline: content.heroTagline || DEFAULT_HERO_TAGLINE,
     };
+
+    if (Array.isArray(content.demo)) {
+      content.demo = content.demo.map((item: any, index: number) => (
+        index === 0 ? { videoId: DEFAULT_DEMO_VIDEO_ID, ...item } : item
+      ));
+    }
   }
 
-  return page.content;
+  return content;
 };
 
 interface AdminEditorProps {
