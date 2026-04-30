@@ -72,6 +72,27 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
     return rank(a) - rank(b);
   });
 
+  const getPlanTier = (plan: any) => {
+    const name = String(plan?.name || "").toLowerCase();
+    const price = String(plan?.price || "").toLowerCase();
+    if (name.includes("enterprise") || name.includes("custom")) return 2;
+    if (name.includes("pro")) return 1;
+    if (name.includes("starter") || name.includes("basic") || name.includes("individual") || price === "free") return 0;
+    if (price === "custom") return 2;
+    return 1;
+  };
+
+  const isFeatureIncludedForPlan = (plan: any, featureName: string) => {
+    const enabledTiers = plans
+      .filter((candidate: any) => candidate.features.some((feature: any) => feature.name === featureName && feature.enabled))
+      .map(getPlanTier);
+
+    if (enabledTiers.length === 0) return false;
+
+    const minimumIncludedTier = Math.min(...enabledTiers);
+    return getPlanTier(plan) >= minimumIncludedTier;
+  };
+
   const mobileComparisonPlans = comparisonPlans;
 
   return (
@@ -234,8 +255,7 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
                         </div>
                         <div className="space-y-3">
                           {allFeatureNames.map((featureName: any, fIdx: number) => {
-                            const feature = p.features.find((f: any) => f.name === featureName);
-                            const isEnabled = feature ? feature.enabled : false;
+                            const isEnabled = isFeatureIncludedForPlan(p, featureName);
                             return (
                               <div key={fIdx} className="flex items-start justify-between gap-3 border-t border-black/5 pt-3 first:border-t-0 first:pt-0">
                                 <span className="text-sm font-semibold text-graphite-night/70 leading-relaxed">{featureName}</span>
@@ -269,8 +289,7 @@ export const PricingPage = ({ content, onNavigate }: { content: any, onNavigate:
                             <tr key={fIdx} className="group hover:bg-flash-light/30 transition-colors">
                               <td className="py-5 px-4 text-sm font-bold text-graphite-night/70 border-b border-black/5">{featureName}</td>
                               {comparisonPlans.map((p: any, pIdx: number) => {
-                                const feature = p.features.find((f: any) => f.name === featureName);
-                                const isEnabled = feature ? feature.enabled : false;
+                                const isEnabled = isFeatureIncludedForPlan(p, featureName);
                                 return (
                                   <td key={pIdx} className="py-5 px-4 text-center border-b border-black/5">
                                     {isEnabled ? (
